@@ -1,0 +1,9 @@
+npm init
+git init
+truffle init
+touch .gitignore
+npm i truffle-assertions // testing
+npm i dotenv
+npm i @openzeppelin/contracts
+npm i @openzeppelin/test-helpers // time constraints
+npm i @truffle/hdwallet-provider
