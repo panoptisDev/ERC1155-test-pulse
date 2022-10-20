@@ -3,7 +3,8 @@ const truffleAssert = require("truffle-assertions");
 require("web3");
 const chainID = config.network_id;
 const { testingConfig } = require("../../helper-truffle-config.js");
-(chainID == 5777 ? contract : contract.skip)(
+
+(chainID != 5777 ? contract : contract.skip)(
   "CrowdSale Testnet",
   async function (accounts) {
     before(async () => {
@@ -14,10 +15,16 @@ const { testingConfig } = require("../../helper-truffle-config.js");
       assert(instance.address != "", "contract deployed incorrectly");
     });
 
+    it("Can't mint without payment", async () => {
+      truffleAssert.reverts(
+        instance.mint.sendTransaction(1, 1),
+        "Insufficient amount", "minted without payment "
+      );
+    });
     it("Mint token", async () => {
       await new Promise((resolve, reject) => {
         instance.mint
-          .sendTransaction(1, 1, { from: accounts[0] })
+          .sendTransaction(1, 1, { from: accounts[0], value: "1" })
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
             if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
@@ -30,15 +37,20 @@ const { testingConfig } = require("../../helper-truffle-config.js");
     });
 
     it("Can't mint more than supply", async () => {
-      truffleAssert.fails(
-        instance.mint(1, 1, { from: accounts[0] }, "minted more than supply")
+      await truffleAssert.reverts(
+        instance.mint(
+          2,
+          2,
+          { from: accounts[0], value: "2" }),
+          "Cant mint given amount of tokens", "minted more than supplys"
+        
       );
     });
 
     it("Batch mint", async () => {
       await new Promise((resolve, reject) => {
         instance.mintBatch
-          .sendTransaction([2, 3, 7, 9], [1, 1, 50, 60])
+          .sendTransaction([2, 3, 7, 9], [1, 1, 50, 60], { value: "172" })
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
             if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
@@ -95,7 +107,7 @@ const { testingConfig } = require("../../helper-truffle-config.js");
     it("Create token", async () => {
       await new Promise((resolve, reject) => {
         instance.createToken
-          .sendTransaction(100, { from: accounts[0] })
+          .sendTransaction(100, 2, { from: accounts[0] })
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
             if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
@@ -119,23 +131,23 @@ const { testingConfig } = require("../../helper-truffle-config.js");
 
     it("Batch create token", async () => {
       let currentId = await instance.totalTypes.call();
-      await instance.createTokenBatch
-        .sendTransaction([1, 3, 55, 43])
-        .then(async (results) => {
-          await truffleAssert.eventEmitted(
-            results,
-            "newToken",
-            async (ev) => {
-              currentId++;
-              assert(currentId == ev.ID, "Invalid value in event");
-            },
-            "newToken event not emitted"
-          );
-        });
+      // await instance.createTokenBatch
+      //   .sendTransaction([1, 3, 55, 43], [2, 3, 4, 5])
+      //   .then(async (results) => {
+      //     await truffleAssert.eventEmitted(
+      //       results,
+      //       "newToken",
+      //       async (ev) => {
+      //         currentId++;
+      //         assert(currentId == ev.ID, "Invalid value in event");
+      //       },
+      //       "newToken event not emitted"
+      //     );
+      //   });
 
       await new Promise((resolve, reject) => {
         instance.createTokenBatch
-          .sendTransaction([1, 3, 55, 43])
+          .sendTransaction([1, 3, 55, 43], [2, 3, 4, 5])
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
             if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
