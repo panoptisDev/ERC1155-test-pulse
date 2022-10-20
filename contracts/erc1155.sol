@@ -5,7 +5,7 @@ contract tokens is ERC1155 {
     uint256[] supplies = [1, 1, 1, 1, 1, 100, 100, 100, 100, 100];
     mapping(uint256 => uint256) public price;
     address immutable i_owner;
-    event newToken(uint256 ID, uint256 amount);
+    event newToken(uint256 ID, uint256 amount, uint price);
 
     constructor() ERC1155("xyz.com") {
         i_owner = msg.sender;
@@ -36,7 +36,7 @@ contract tokens is ERC1155 {
         supplies.push(_amount);
         uint256 id = supplies.length;
         price[id] = _price;
-        emit newToken(id, _amount);
+        emit newToken(id, _amount,_price);
     }
 
     function createTokenBatch(
@@ -48,34 +48,33 @@ contract tokens is ERC1155 {
             supplies.push(_amount[i]);
             id = id + 1;
             price[id] = _prices[i];
-            emit newToken(id, _amount[i]);
+            emit newToken(id, _amount[i],_prices[i]);
         }
     }
 
     function mint(uint256 _id, uint256 _amount) external payable {
         uint256 temp = supplies[_id - 1];
-       
-        require(msg.value >= price[_id], "Insufficient amount");
+
+        require(msg.value >= price[_id] * _amount, "Insufficient amount");
         require(_id > 0 && _id <= supplies.length, "Not a valid ID");
         require(temp > 0, "Token out of supply");
         require(temp >= _amount, "Cant mint given amount of tokens");
         supplies[_id - 1] = temp - _amount;
         _mint(msg.sender, _id, _amount, "");
-       
     }
 
     function mintBatch(uint256[] calldata _ids, uint256[] calldata _amounts)
         external
         payable
     {
-        uint paid= msg.value;
+        uint256 paid = msg.value;
         for (uint256 i = 0; i < _ids.length; i++) {
             uint256 temp = supplies[_ids[i] - 1];
             require(
                 _ids[i] > 0 && _ids[i] <= supplies.length,
                 "Not a valid ID"
             );
-            
+
             require(paid >= price[i] * _amounts[i]);
             paid -= price[_ids[i]] * _amounts[i];
             require(temp > 0, "Token out of supply");
@@ -83,7 +82,6 @@ contract tokens is ERC1155 {
             supplies[_ids[i] - 1] = temp - _amounts[i];
             _mint(msg.sender, _ids[i], _amounts[i], "");
         }
-       
     }
 
     function burn(
