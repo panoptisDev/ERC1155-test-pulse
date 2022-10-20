@@ -10,7 +10,7 @@ const chainID = config.network_id;
     });
 
     it("Deployed succesfully", async () => {
-      instance.address != "";
+      assert(instance.address != "", "contract deployed incorrectly ");
     });
 
     it("Mint token", async () => {
@@ -22,7 +22,14 @@ const chainID = config.network_id;
     });
 
     it("Can't mint more than supply", async () => {
-      truffleAssert.fails(instance.mint(1, 1, { from: accounts[0] }));
+      truffleAssert.fails(
+        instance.mint(
+          1,
+          1,
+          { from: accounts[0] },
+          "Cant mint given amount of tokens"
+        )
+      );
     });
 
     it("Batch mint", async () => {
@@ -35,7 +42,7 @@ const chainID = config.network_id;
         .then((x) =>
           assert(
             x[0] == 1 && x[1] == 1 && x[2] == 50 && x[3] == 60,
-            "All minted successfully"
+            "Batch mint unsuccessful"
           )
         );
     });
@@ -44,7 +51,7 @@ const chainID = config.network_id;
       await instance.burn.sendTransaction(accounts[0], 1, 1);
       await instance
         .balanceOf(accounts[0], 1)
-        .then((x) => assert(x.toString() == 0, "Not burned"));
+        .then((x) => assert(x.toString() == 0, "Token not burned"));
     });
 
     it("Batch burn", async () => {
@@ -58,20 +65,29 @@ const chainID = config.network_id;
           [accounts[0], accounts[0], accounts[0], accounts[0]],
           [2, 3, 7, 9]
         )
-        .then((x) => assert(x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0));
+        .then((x) =>
+          assert(
+            x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0,
+            "Batch burn failed"
+          )
+        );
     });
 
     it("Create token", async () => {
       await instance.createToken
         .sendTransaction(100, { from: accounts[0] })
         .then(async (results) => {
-          await truffleAssert.eventEmitted(results, "newToken", async (ev) =>
-            assert(
-              ev.ID == "11" &&
-                ev.amount == "100" &&
-                (await instance.totalTypes.call()) == 11,
-              " Event values do not match"
-            )
+          await truffleAssert.eventEmitted(
+            results,
+            "newToken",
+            async (ev) =>
+              assert(
+                ev.ID == "11" &&
+                  ev.amount == "100" &&
+                  (await instance.totalTypes.call()) == 11,
+                "Event values do not match"
+              ),
+            "newToken event not emitted"
           );
         });
     });
@@ -81,10 +97,15 @@ const chainID = config.network_id;
       await instance.createTokenBatch
         .sendTransaction([1, 3, 55, 43])
         .then(async (results) => {
-          await truffleAssert.eventEmitted(results, "newToken", async (ev) => {
-            currentId++;
-            assert(currentId == ev.ID, "Batch token creation failed");
-          });
+          await truffleAssert.eventEmitted(
+            results,
+            "newToken",
+            async (ev) => {
+              currentId++;
+              assert(currentId == ev.ID, "Batch token creation failed");
+            },
+            "newToken event not emitted"
+          );
         });
     });
   }

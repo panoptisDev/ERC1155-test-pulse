@@ -2,7 +2,8 @@ const erc1155 = artifacts.require("tokens");
 const truffleAssert = require("truffle-assertions");
 require("web3");
 const chainID = config.network_id;
-(chainID != 5777 ? contract : contract.skip)(
+const { testingConfig } = require("../../helper-truffle-config.js");
+(chainID == 5777 ? contract : contract.skip)(
   "CrowdSale Testnet",
   async function (accounts) {
     before(async () => {
@@ -10,38 +11,36 @@ const chainID = config.network_id;
     });
 
     it("Deployed succesfully", async () => {
-      instance.address != "";
+      assert(instance.address != "", "contract deployed incorrectly");
     });
 
     it("Mint token", async () => {
-      //await instance.mint.sendTransaction(1, 1, { from: accounts[0] });
       await new Promise((resolve, reject) => {
         instance.mint
           .sendTransaction(1, 1, { from: accounts[0] })
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           });
       });
 
-      // await b;
-
       await instance
         .balanceOf(accounts[0], 1)
-        .then((x) => assert(x.toString() == 1));
+        .then((x) => assert(x.toString() == 1, "token creation failed"));
     });
 
     it("Can't mint more than supply", async () => {
-      truffleAssert.fails(instance.mint(1, 1, { from: accounts[0] }));
+      truffleAssert.fails(
+        instance.mint(1, 1, { from: accounts[0] }, "minted more than supply")
+      );
     });
 
     it("Batch mint", async () => {
-      //   await instance.mintBatch.sendTransaction([2, 3, 7, 9], [1, 1, 50, 60]);
       await new Promise((resolve, reject) => {
         instance.mintBatch
           .sendTransaction([2, 3, 7, 9], [1, 1, 50, 60])
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           });
       });
@@ -54,38 +53,31 @@ const chainID = config.network_id;
         .then((x) =>
           assert(
             x[0] == 1 && x[1] == 1 && x[2] == 50 && x[3] == 60,
-            "All minted successfully"
+            "Bathc mint unsuccessful"
           )
         );
     });
 
     it("Burn tokens", async () => {
-      //await instance.burn.sendTransaction(accounts[0], 1, 1);
       await new Promise((resolve, reject) => {
         instance.burn
           .sendTransaction(accounts[0], 1, 1)
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           });
       });
       await instance
         .balanceOf(accounts[0], 1)
-        .then((x) => assert(x.toString() == 0));
+        .then((x) => assert(x.toString() == 0), "burn token failed");
     });
 
     it("Batch burn", async () => {
-      // await instance.burnBatch.sendTransaction(
-      //   accounts[0],
-      //   [2, 3, 7, 9],
-      //   [1, 1, 50, 60]
-      // );
-
       await new Promise((resolve, reject) => {
         instance.burnBatch
           .sendTransaction(accounts[0], [2, 3, 7, 9], [1, 1, 50, 60])
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           });
       });
@@ -94,35 +86,32 @@ const chainID = config.network_id;
           [accounts[0], accounts[0], accounts[0], accounts[0]],
           [2, 3, 7, 9]
         )
-        .then((x) => assert(x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0));
+        .then(
+          (x) => assert(x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0),
+          "batch burn failed"
+        );
     });
 
     it("Create token", async () => {
-      //   await instance.createToken
-      //     .sendTransaction(100, { from: accounts[0] })
-      //     .then(async (results) => {
-      //       await truffleAssert.eventEmitted(results, "newToken", async (ev) =>
-      //         assert(
-      //           ev.ID == "11" &&
-      //             ev.amount == "100" &&
-      //             (await instance.totalTypes.call()) == 11
-      //         )
-      //       );
-      //     });
       await new Promise((resolve, reject) => {
-         instance.createToken
+        instance.createToken
           .sendTransaction(100, { from: accounts[0] })
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           })
           .then(async (results) => {
-            await truffleAssert.eventEmitted(results, "newToken", async (ev) =>
-              assert(
-                ev.ID == "11" &&
-                  ev.amount == "100" &&
-                  (await instance.totalTypes.call()) == 11
-              )
+            await truffleAssert.eventEmitted(
+              results,
+              "newToken",
+              async (ev) =>
+                assert(
+                  ev.ID == "11" &&
+                    ev.amount == "100" &&
+                    (await instance.totalTypes.call()) == 11,
+                  "event value invalid"
+                ),
+              "newToken event not emitted"
             );
           });
       });
@@ -130,20 +119,25 @@ const chainID = config.network_id;
 
     it("Batch create token", async () => {
       let currentId = await instance.totalTypes.call();
-        await instance.createTokenBatch
-          .sendTransaction([1, 3, 55, 43])
-          .then(async (results) => {
-            await truffleAssert.eventEmitted(results, "newToken", async (ev) => {
+      await instance.createTokenBatch
+        .sendTransaction([1, 3, 55, 43])
+        .then(async (results) => {
+          await truffleAssert.eventEmitted(
+            results,
+            "newToken",
+            async (ev) => {
               currentId++;
-              assert(currentId == ev.ID);
-            });
-          });
+              assert(currentId == ev.ID, "Invalid value in event");
+            },
+            "newToken event not emitted"
+          );
+        });
 
       await new Promise((resolve, reject) => {
         instance.createTokenBatch
           .sendTransaction([1, 3, 55, 43])
           .on("confirmation", function (confNumber, receipt, latestBlockHash) {
-            if (confNumber > 3) resolve();
+            if (confNumber > testingConfig.blockConfirmation) resolve();
             else console.log(confNumber);
           })
           .then(async (results) => {
@@ -152,8 +146,9 @@ const chainID = config.network_id;
               "newToken",
               async (ev) => {
                 currentId++;
-                assert(currentId == ev.ID);
-              }
+                assert(currentId == ev.ID, "Invalid value in event");
+              },
+              "newToken event not emitted"
             );
           });
       });
