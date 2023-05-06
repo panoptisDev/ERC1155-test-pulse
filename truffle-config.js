@@ -1,5 +1,8 @@
 /**
- 
+ * 
+ * yarn add truffle-plugin-verify
+ * yarn add dotenv
+ * yarn add @truffle/hdwallet-provider
 * 
  * https://trufflesuite.com/docs/truffle/getting-started/using-the-truffle-dashboard/
  */
@@ -10,6 +13,9 @@ const { MNEMONIC, PROJECT_ID, INFURA_WS } = process.env;
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
 module.exports = {
+
+  plugins: ["truffle-plugin-verify"],
+  
   /**
    * Networks define how you connect to your ethereum client and let you set the
    * defaults web3 uses to send transactions. If you don't specify one truffle
@@ -56,7 +62,7 @@ module.exports = {
     ire: {
       provider: () => new HDWalletProvider(MNEMONIC, "https://rpc-testnet.5ire.network"),
       network_id: 997, // Goerli's id
-      confirmations: 6, // # of confirmations to wait between deployments. (default: 0)
+      confirmations: 1, // # of confirmations to wait between deployments. (default: 0)
       networkCheckTimeout: 1000000,
       timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
@@ -72,7 +78,7 @@ module.exports = {
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     shimmer: {
-      provider: () => new HDWalletProvider(MNEMONIC, "https://json-rpc.evm.testnet.shimmer.network"),
+      provider: () => new HDWalletProvider(MNEMONIC, "https://json-rpc.evm.testnet.shimmer.network/"),
       network_id: 1071, // Goerli's id
       confirmations: 10, // # of confirmations to wait between deployments. (default: 0)
       networkCheckTimeout: 1000000,
@@ -116,7 +122,11 @@ module.exports = {
   mocha: {
     // timeout: 100000
   },
-
+  verify: {
+    apiUrl: "https://explorer.goerli.linea.build/api",
+    apiKey: process.env.ETHERSCAN_API_KEY,
+    explorerUrl: "https://explorer.goerli.linea.build/",
+  },
   // Configure your compilers
   compilers: {
     solc: {
