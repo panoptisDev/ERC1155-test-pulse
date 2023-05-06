@@ -56,25 +56,27 @@ module.exports = {
     ire: {
       provider: () => new HDWalletProvider(MNEMONIC, "https://rpc-testnet.5ire.network"),
       network_id: 997, // Goerli's id
-      confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
+      confirmations: 6, // # of confirmations to wait between deployments. (default: 0)
       networkCheckTimeout: 1000000,
       timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     pulse: {
-      provider: () => new HDWalletProvider(MNEMONIC, "https://rpc.v4.testnet.pulsechain.com"),
-      network_id: 943, // Goerli's id
+      provider: () => new HDWalletProvider(MNEMONIC, "wss://rpc.v4.testnet.pulsechain.com"),
+      network_id: 943,
+      gas: 30000000,           // Gas sent with each transaction (default: ~6700000)
+      gasPrice: 20000000000,
       confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
-      networkCheckTimeout: 1000000,
-      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      networkCheckTimeout: 10000,
+      timeoutBlocks: 900, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     shimmer: {
       provider: () => new HDWalletProvider(MNEMONIC, "https://json-rpc.evm.testnet.shimmer.network"),
       network_id: 1071, // Goerli's id
-      confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
+      confirmations: 10, // # of confirmations to wait between deployments. (default: 0)
       networkCheckTimeout: 1000000,
-      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      timeoutBlocks: 2000000, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     linea: {
@@ -88,16 +90,26 @@ module.exports = {
     metis: {
       provider: () => new HDWalletProvider(MNEMONIC, "https://goerli.gateway.metisdevops.link"),
       network_id: 599, // Goerli's id https://goerli.gateway.metisdevops.link
-      confirmations: 4, // # of confirmations to wait between deployments. (default: 0)
+      confirmations: 1, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    mantle: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://rpc.testnet.mantle.xyz"),
+      network_id: 5001, // Goerli's id https://goerli.gateway.metisdevops.link
+      confirmations: 3, // # of confirmations to wait between deployments. (default: 0)
       networkCheckTimeout: 1000000,
       timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     // truffle migrate --reset --network ire
+    // truffle migrate --reset --network metis
     // truffle migrate --reset --network pulse
     // truffle migrate --reset --network shimmer
     // truffle migrate --reset --network linea
-    // truffle migrate --reset --network metis
+    // truffle migrate --reset --network mantle
+
   },
 
   // Set default mocha options here, use special reporters, etc.
@@ -141,4 +153,3 @@ module.exports = {
   //   }
   // }
 };
-
