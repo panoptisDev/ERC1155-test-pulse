@@ -8,13 +8,16 @@
  */
 
 require("dotenv").config();
-const { MNEMONIC, PROJECT_ID, INFURA_WS } = process.env;
+const { MNEMONIC, } = process.env;
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
 module.exports = {
 
   plugins: ["truffle-plugin-verify"],
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY,
+  },
   
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -33,11 +36,7 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
-    development: {
-      host: "127.0.0.1", // Localhost (default: none)
-      port: 8545, // Standard Ethereum port (default: none)
-      network_id: "*", // Any network (default: none)
-    },
+    
 
     // An additional network, but with some advanced options…
     // advanced: {
@@ -122,11 +121,7 @@ module.exports = {
   mocha: {
     // timeout: 100000
   },
-  verify: {
-    apiUrl: "https://explorer.goerli.linea.build/api",
-    apiKey: process.env.ETHERSCAN_API_KEY,
-    explorerUrl: "https://explorer.goerli.linea.build/",
-  },
+
   // Configure your compilers
   compilers: {
     solc: {

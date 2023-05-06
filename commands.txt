@@ -7,3 +7,4 @@ npm i dotenv
 npm i @openzeppelin/contracts
 npm i @openzeppelin/test-helpers // time constraints
 npm i @truffle/hdwallet-provider
+yarn add truffle-assertions
