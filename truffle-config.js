@@ -1,43 +1,6 @@
 /**
- * Use this file to configure your truffle project. It's seeded with some
- * common settings for different networks and features like migrations,
- * compilation, and testing. Uncomment the ones you need or modify
- * them to suit your project as necessary.
- *
- * More information about configuration can be found at:
- *
- * https://trufflesuite.com/docs/truffle/reference/configuration
- *
- * Hands-off deployment with Infura
- * --------------------------------
- *
- * Do you have a complex application that requires lots of transactions to deploy?
- * Use this appproach to make deployment a breeze 🏖️:
- *
- * Infura deployment needs a wallet provider (like @truffle/hdwallet-provider)
- * to sign transactions before they're sent to a remote public node.
- * Infura accounts are available for free at 🔍: https://infura.io/register
- *
- * You'll need a mnemonic - the twelve word phrase the wallet uses to generate
- * public/private key pairs. You can store your secrets 🤐 in a .env file.
- * In your project root, run `$ npm install dotenv`.
- * Create .env (which should be .gitignored) and declare your MNEMONIC
- * and Infura PROJECT_ID variables inside.
- * For example, your .env file will have the following structure:
- *
- * MNEMONIC = <Your 12 phrase mnemonic>
- * PROJECT_ID = <Your Infura project id>
- *
- * Deployment with Truffle Dashboard (Recommended for best security practice)
- * --------------------------------------------------------------------------
- *
- * Are you concerned about security and minimizing rekt status 🤔?
- * Use this method for best security:
- *
- * Truffle Dashboard lets you review transactions in detail, and leverages
- * MetaMask for signing, so there's no need to copy-paste your mnemonic.
- * More details can be found at 🔎:
- *
+ 
+* 
  * https://trufflesuite.com/docs/truffle/getting-started/using-the-truffle-dashboard/
  */
 
@@ -90,13 +53,51 @@ module.exports = {
       timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
-    //
-    // Useful for private networks
-    // private: {
-    //   provider: () => new HDWalletProvider(MNEMONIC, `https://network.io`),
-    //   network_id: 2111,   // This network is yours, in the cloud.
-    //   production: true    // Treats this network as if it was a public net. (default: false)
-    // }
+    ire: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://rpc-testnet.5ire.network"),
+      network_id: 997, // Goerli's id
+      confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    pulse: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://rpc.v4.testnet.pulsechain.com"),
+      network_id: 943, // Goerli's id
+      confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    shimmer: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://json-rpc.evm.testnet.shimmer.network"),
+      network_id: 1071, // Goerli's id
+      confirmations: 2, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    linea: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://rpc.goerli.linea.build/"),
+      network_id: 59140, // Goerli's id https://goerli.gateway.metisdevops.link
+      confirmations: 10, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    metis: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://goerli.gateway.metisdevops.link"),
+      network_id: 599, // Goerli's id https://goerli.gateway.metisdevops.link
+      confirmations: 4, // # of confirmations to wait between deployments. (default: 0)
+      networkCheckTimeout: 1000000,
+      timeoutBlocks: 20000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    // truffle migrate --reset --network ire
+    // truffle migrate --reset --network pulse
+    // truffle migrate --reset --network shimmer
+    // truffle migrate --reset --network linea
+    // truffle migrate --reset --network metis
   },
 
   // Set default mocha options here, use special reporters, etc.
@@ -108,14 +109,14 @@ module.exports = {
   compilers: {
     solc: {
       version: "0.8.17", // Fetch exact version from solc-bin (default: truffle's version)
-      // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
-      // settings: {          // See the solidity docs for advice about optimization and evmVersion
-      //  optimizer: {
-      //    enabled: false,
-      //    runs: 200
-      //  },
+       docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
+       settings: {          // See the solidity docs for advice about optimization and evmVersion
+        optimizer: {
+          enabled: true,
+          runs: 200
+        },
       //  evmVersion: "byzantium"
-      // }
+       }
     },
   },
 
@@ -140,3 +141,4 @@ module.exports = {
   //   }
   // }
 };
+
